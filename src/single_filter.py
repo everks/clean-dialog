@@ -70,6 +70,10 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
             # songyi 10-6
             if opt.no_session_ad and session_level.isAd(dialog):
                 dirty_data['other']['session_ad'].add(dialog[0])
+                continue
+            if opt.context_filter and not session_level.pass_context_filter(dialog):
+                dirty_data['other']['session_filter'].add(dialog[0])
+                continue
 
             new_dialog = []
             # 对dialog中的每一个uttr进行清洗，将清洗后的数据放入new_dialog
@@ -232,6 +236,9 @@ def add_filter_args(argparser):
     opt.add_argument('--punc_regularized', action='store_true')
     opt.add_argument('--no_session_ad', action='store_true')
     opt.add_argument('--remove_all', action='store_true')
+    opt.add_argument('--context_filter', action='store_true', 
+            help='根据context内容来清洗对话，目前判断规则为context以\
+                vo:或3个以上的数字结尾')
 
 
 def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data, time_dict, cut,

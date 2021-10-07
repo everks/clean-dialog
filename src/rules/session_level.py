@@ -1,3 +1,5 @@
+import re
+
 def de_name(session, name_set):
     n = 1
     name_dict = {}
@@ -30,7 +32,14 @@ def isAd(dialog):
     
     ad_list = ['出租','转卖','成新','代购','出售','转让','合租','直租','整租','开团','便宜卖']
 
-    for ad_word in context:
+    for ad_word in ad_list:
         if ad_word in context:
             return True
     return False
+
+context_filter_pattern = re.compile('[0-9]{3,}$')
+def pass_context_filter(dialog):
+    text = dialog[0]
+    if text.endswith('vo:') or context_filter_pattern.search(text):
+        return False
+    return True

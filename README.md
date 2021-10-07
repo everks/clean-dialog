@@ -92,3 +92,4 @@ NOTE THAT:
 | punc_regularized  | 进行标点符号规格化    |
 | no_session_ad     | 根据关键词去除广告    |
 | remove_all        | 去除所有非中文和英文的字符  |
+| context_filter    | 根据context内容进行清除(目前去除以vo:或三个以上数字结尾的context)   |

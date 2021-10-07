@@ -30,10 +30,16 @@ def removeAll(text):
     text = "'我是[🍐]@/.(⊙o⊙)…फक यूadkg/,\]\=-'./.,';.'"
     print(pattern.sub('', text))
 
+context_filter_pattern = re.compile('[0-9]{3,}$')
+def pass_context_filter(dialog):
+    text = dialog[0]
+    if text.endswith('vo:') or context_filter_pattern.search(text):
+        return False
+    return True
+
 if __name__ == '__main__':
 
-    ret = puncRegularized('衣服】11元!zara工字背心!要干净的纯棉的!不要螺纹的不要竖纹的!!!手机党马克')
-    print(ret)
+
     
 
 
