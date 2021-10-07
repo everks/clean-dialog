@@ -19,6 +19,18 @@ SPECIAL_LISTS = ["<EMAIL>", "<PHONE>"]
 
 
 def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
+    '''
+    Args:
+        opt: 命令行参数args
+        file_id: 清洗后的数据应该存放的文件名（不包含后缀）
+        data: (path, start, end) 分别为需要清洗的数据文件存放路径，文件中开始行数（包含）和结束行数（不包含）
+        blacklist: 字典类型，存放各种辅助数据，TODO: 待补充
+        out_path: 清洗后的数据应该存放的文件路径
+        dirty_dir: 清洗后的脏数据应该存放的文件路径
+        cut: 
+    Returns:
+
+    '''
     try:
         logger.info("The saved path of data is {}".format(out_path))
 
@@ -47,24 +59,37 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
             dialog = data.pop(0)
             # session level
             # dialog = session_check(opt, dialog)
+
             if opt.no_utter_dup:
+                # 排除所有去重后不构成对话的数据
                 if len(set(dialog)) < 2:
                     if dirty_data and len(set(dialog)) > 0:
                         dirty_data["other"]["less_pair"].add(dialog[0])
                     continue
 
+            # songyi 10-6
+            if opt.no_session_ad and session_level.isAd(dialog):
+                dirty_data['other']['session_ad'].add(dialog[0])
+
             new_dialog = []
+            # 对dialog中的每一个uttr进行清洗，将清洗后的数据放入new_dialog
             for i in range(len(dialog)):
+                # 根据微博转发规则将对话拆开, utters 是对话的数组，即数组的数组。
+                # TODO: 问答是不是倒了？
                 if opt.split_multi_repost:
                     utters = str_level.split_multi_repost(dialog[i])
                 else:
                     utters = [dialog[i]]
 
                 skip_utter = False
+                # 对于拆分出来的utters
                 for j, utter in enumerate(utters):
                     if skip_utter:
                         skip_utter = False
                         continue
+
+                    # 判断如果数据是微博投票，将数据过滤掉
+                    # 如果下一句是投票的话，则跳过这句和下一句
                     if opt.no_toupiao and (j + 1) < len(utters):
                         toupiao = str_level.no_toupiao(utters[j + 1])
                         if toupiao:
@@ -73,13 +98,20 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
                                 dirty_data["other"]["toupiao"].add(utters[j] + "\t\t" + utters[j + 1])
                             continue
 
+                    
+                    # 删除空格
                     tight_utter = utter.replace(" ", "")
+                    # 进行正则表达式，关键词匹配，将clean后的utter保存到new_dialog
                     utter = utterance_clean(opt, file_id, utter, tight_utter, blacklist, dirty_data, time_dict, cut)
+                    # utter为分词后的字符串，词与词之间用空格隔开
                     new_dialog.append(utter)
 
+            # 同一替换对话中所有的人名
             if opt.re_name:
                 new_dialog = session_level.de_name(new_dialog, blacklist["name"])
 
+
+            # TODO: 暂时没看懂
             start_idx = 0 if new_dialog[0] else 1
             for i in range(1, len(new_dialog) + 1):
                 if i == len(new_dialog) or not new_dialog[i]:
@@ -120,6 +152,8 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
             save_dirty(dirty_dir, dirty_data, file_id)
         logger.info("{}  over".format(file_id))
     except Exception as e:
+        import traceback
+        print(traceback.format_exc())
         logger.error("Error !!!! : {}, log in {}".format(e, out_path))
     return file_id
 
@@ -193,13 +227,36 @@ def add_filter_args(argparser):
     opt.add_argument('--yda_dedupl', action="store_true")
     # todo remedy http
 
+    # songyi 10-6
+    opt.add_argument('--simplified', action='store_true')
+    opt.add_argument('--punc_regularized', action='store_true')
+    opt.add_argument('--no_session_ad', action='store_true')
+    opt.add_argument('--remove_all', action='store_true')
+
 
 def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data, time_dict, cut,
                     return_segmented=True) -> str:
+    """
+    Args:
+        opt: 
+        file_id: 
+        utterance: 拆分过后的句子
+        tight_utter: 拆分过后并祛除了空格的句子
+        blacklist: 
+        dirty_data:
+        time_dict:
+        cut:
+        return_segmented:
+    """
     orig_utter = utterance[:]
     utterance = utterance.strip()
 
+    # TODO: 不知道是什么作用
     utterance = utterance.replace("alink", "")
+
+    # songyi 10-6
+    if opt.remove_all:
+        utterance = str_level.removeAll(utterance)
 
     # TODO check
     if "¡ 评论" in utterance:
@@ -207,6 +264,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
         if dirty_data:
             dirty_data["other"]["¡ 评论"].add(orig_utter)
 
+    # 去除一些特定的句子，如 "转发" 
     if utterance and opt.no_specific_utter:
         specific_utter = str_level.no_specific_utter(tight_utter)
         if specific_utter:
@@ -214,6 +272,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
                 dirty_data["other"]["specific_utter"].add(orig_utter)
             utterance = ""
 
+    # 去除微博中 "回复 @XXX:"
     if utterance and opt.de_reply_tag:
         len_before = len(utterance)
         utterance = str_level.REPLY_MENTION_REGEX.sub("", utterance).strip()
@@ -221,6 +280,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
             dirty_data["other"]["de_reply_tag"].add(orig_utter)
 
     # regex
+    # 去除 <XXX> 其中XXX为非中文
     if utterance and opt.de_angle:
         len_before = len(utterance)
         utterance = str_level.ANGLE_REGEX.sub("", utterance).strip()
@@ -339,6 +399,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
         if dirty_data and len(utterance) < len_before:
             dirty_data["other"]["cleantext"].add(orig_utter)
 
+    # TODO: 没细看
     if utterance and opt.bert_clean:
         utterance = str_level.bert_clean(utterance)
 
@@ -367,6 +428,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
                 dirty_data["str_blacklist"][black_word].add(orig_utter)
             utterance = ""
 
+    # TODO: 没细看
     if utterance and opt.de_duplicated:
         len_before = len(utterance)
         utterance = str_level.reduce_duplicated_phrase(utterance)
@@ -387,8 +449,19 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
                 dirty_data["other"]["long"].add(orig_utter)
             utterance = ""
 
+    # songyi 10-6 
+    if utterance and opt.simplified:
+        utterance = str_level.toSimplified(utterance)
+    
+    if utterance and opt.punc_regularized:
+        utterance = str_level.puncRegularized(utterance)
+
+
+
     if not any([opt.no_alpha_noise, opt.check_confuse_word, opt.no_word_blacklist, opt.yda_dedupl]):
         return utterance.strip()
+
+    
 
     ### word level
     if cut:

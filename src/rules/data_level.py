@@ -9,7 +9,9 @@ logger = logging.getLogger(__file__)
 
 
 def no_ad(data, dirty_data):
-    """A Dataset for Research on Short-Text Conversation (Wang et al. 2013)"""
+    """A Dataset for Research on Short-Text Conversation (Wang et al. 2013)
+        基于重复的广告检测，但不能直接检测广告词。
+    """
     resp_dict = collections.defaultdict(set)
     for dialog in data:
         for i in range(1, len(dialog)):

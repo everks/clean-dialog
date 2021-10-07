@@ -49,6 +49,10 @@ def load_gz_jsonl(path):
 
 
 def load_lines(path, start, end):
+    '''
+    Returns:
+        data -> list: path文件中的[start, end)行，每一行是一个dialog。
+    '''
     data = []
     with open(path, encoding="utf-8") as f:
         i = -1
@@ -114,6 +118,7 @@ def dist_get_lines(start, end, data_files, data_files_offset):
 
 def wc_count(file_name):
     out = subprocess.getoutput("wc -l %s" % file_name)
+    print('wc_count: ', out)
     return int(out.split()[0]) + 1
 
 

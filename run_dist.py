@@ -53,13 +53,17 @@ def main():
     parser.add_argument("--out_dir", type=str, default="./data/", help="Main data dir.")
     parser.add_argument("--dirty_dir", type=str, default="", help="Dir to save dirty cases.")
     parser.add_argument("--raw_dir", type=str, default="./data/raw/", help="Dir of the raw dataset.")
+    
+    # TODO: 不知道里面具体是什么参数 
     add_filter_args(parser)
     args = parser.parse_args()
     logger.info(args)
+
     p = Pool(args.n_p)
 
     logger.info("Preparing")
     dataloader = paths_dataloader(args.raw_dir, args.out_dir, args.batch_size)
+    # TODO: 不知道里面具体细节
     blacklists = get_filter_set(args.tool_dir)
 
     # single process debug
@@ -71,6 +75,7 @@ def main():
 
     # multi processing
     logger.info("Cleaning start!")
+    # [start, end) 为文件对对应的行号，从1开始。
     for file_id, path, start, end, outpath in dataloader:
         data = (path, start, end)
         p.apply_async(main_filter, args=(args, file_id, data, blacklists, outpath, args.dirty_dir))

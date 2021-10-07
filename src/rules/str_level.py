@@ -2,6 +2,9 @@ import re
 import emoji
 import time
 import unicodedata
+from hanziconv import HanziConv
+from zhon import hanzi
+import string
 
 from nltk.corpus import wordnet
 
@@ -106,7 +109,7 @@ WEIBO_URL_REGEX = re.compile(
     r"(?:(?:https?:?\/\/|ftp:\/\/|www\d{0,3}\.)t\.cn?(\/[a-zA-Z0-9]{0,8})?)"
 )
 
-PHONE_REGEX = re.compile(r"\D\d{11}\D")
+PHONE_REGEX = re.compile(r"\d{11}")
 
 QQ_REGEX = re.compile(r"[qQ]{2,}\d{5,12}\D")
 
@@ -416,3 +419,21 @@ if __name__ == "__main__":
     pat = re.compile(r"([^a-zA-Z])(tm)([^a-zA-Z])", re.I)
     print(pat.sub(lambda m: m.group(1) + m.group(3), test_text))
     print("over")
+
+# ------------------------------------------------------------------------------------------
+# author: songyi 
+# email: 757503218@qq.com
+# date: 2021.10.7
+
+def toSimplified(text):
+    return HanziConv.toSimplified(text)
+
+def puncRegularized(text):
+    '''如果有多个标点符号连在一起，调整为最后一个出现的符号'''
+    punctuation = string.punctuation + hanzi.punctuation
+    return re.sub("(?!</)([%s]+)([%s])" %(punctuation, punctuation), "\\2", text)
+
+REMOVE_ALL_PATTERN = re.compile('[^\u4e00-\u9fa5_a-zA-Z0-9%s%s]+' % (string.punctuation, hanzi.punctuation))
+def removeAll(text):
+    '''删除所有非中文和英文的字符'''
+    return REMOVE_ALL_PATTERN.sub('', text)

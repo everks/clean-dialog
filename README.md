@@ -50,7 +50,7 @@ NOTE THAT:
 | dirty_dir         | 存储清洗出来的脏数据，如为空则不存  |
 | :---------------  | :------------------- |
 | split_multi_repost| 将微博转发数据按"//@aaa XXXX //@bbb XXX"撕开成多句  |
-| no_utter_dup   | 如果 context == response 则去掉该对话  |
+| no_utter_dup   | dialog句间去重后如果集合len小于2，则丢弃数据  |
 | re_name           | 人名用 <NAME1>, <NAME2> ...替换 |
 | no_ad             | 去除可能是广告的对话（同样的回复对应多个context）借鉴[论文](https://www.aclweb.org/anthology/D13-1096.pdf) |
 | de_generic_dialog | 去通用回复 借鉴[论文](https://arxiv.org/abs/1911.00536)|
@@ -69,7 +69,7 @@ NOTE THAT:
 | de_repost         | 去除句中 "//XXX" |
 | de_duplicated     | 句中短语降重 （待用后缀算法优化） |
 | de_emoji          | 去除emoji （代补全） |
-| no_special_topic  | 过滤包含特定名单词的对话对话 |
+| no_special_topic  | 过滤包含特定名单词的对话 |
 | no_str_blacklist  | 过滤包含黑名单词的对话 |
 | no_toupiao        | 判断是否是微博投票 |
 | no_specific_utter | 删除一些特定句子 |
@@ -88,3 +88,7 @@ NOTE THAT:
 | no_alpha_noise    | 过滤掉含有不成 英文单词的 字母组合 的句子 |
 | check_confuse_word| 保存包含混淆名单词的对话进行recall |
 | yda_dedupl        | 如果一个词语在句子中出现的比例 超过一个阈值则放弃该句子 |
+| simplified        | 将繁体字转换为简体字  |
+| punc_regularized  | 进行标点符号规格化    |
+| no_session_ad     | 根据关键词去除广告    |
+| remove_all        | 去除所有非中文和英文的字符  |
