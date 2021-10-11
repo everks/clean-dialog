@@ -1,0 +1,29 @@
+对话数据目录：
+115.182.62.168:/home/zhengyinhe/DialogueFilter/data/ripe_20180813
+
+文件说明：
+flt_dialogues*.pkl：包含了所有的对话，每个对话是一个cid组成的列表，每个cid对应一个对话句子。
+    flt_dialogues_0_35976222.pkl: 大约8G内存，一共35976223个对话
+cid2split_text*.pkl：cid对应的句子
+    16个文件, 每个文件占约2G内存, 约有10000004个句子， 类型为dict，key是cid，value是句子，句子格式是用空格分开的词。
+    16个文件占32G内存。
+cid2uid*.pkl：每个cid对应的发话人标识，每个发话人由一个uid表示
+    16个文件
+    # 在清洗时应该用不到。
+user_*.pkl：每个发话人的信息
+    在清洗时应该用不到。
+
+
+pkl文件的读取方式：
+在python3环境中使用如下代码读取
+
+import pickle
+with open('filename', 'rb') as f:
+    res = pickle.load(f)
+
+
+文件weibo_0_10000000.pkl,占用内存约11G
+weiboid2uid_0_10000000.pkl,占用内存约2G
+weiboid2time_0_10981191.pkl，占用内存约2G
+cid2raw_text_0_10000003.pkl, 1G
+cid2weiboid_0_10000003
