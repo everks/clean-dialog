@@ -232,3 +232,4 @@ dmypy.json
 # yida
 data*/
 toy_data/
+tmp/

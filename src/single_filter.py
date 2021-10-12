@@ -113,13 +113,18 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
                     new_dialog.append(utter)
 
             # 同一替换对话中所有的人名
+            print('before: ', new_dialog)
             if opt.re_name:
                 new_dialog = session_level.de_name(new_dialog, blacklist["name"])
 
 
-            # TODO: 暂时没看懂
+            # 根据dialog中的空字符串将对话拆分成好几个对话
+
+            # 如果对话第一句为空，则从第二句开始算起
             start_idx = 0 if new_dialog[0] else 1
+            # 遍历dialog
             for i in range(1, len(new_dialog) + 1):
+                # 如果遍历完毕或当前sentence为空字符串
                 if i == len(new_dialog) or not new_dialog[i]:
                     if opt.no_short_response:
                         part_dialog = new_dialog[start_idx: i][:]
@@ -130,6 +135,7 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
                         if len(new_dialog[start_idx: i]) > 1:
                             res.append(new_dialog[start_idx: i])
                     start_idx = i + 1
+            print('middle: ', res)
             # for i in range(1, len(new_dialog)):
             #     if not new_dialog[i]:
             #         if len(new_dialog[start_idx: i]) > 1:
@@ -429,13 +435,16 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
             utterance = ""
 
     if utterance and opt.no_str_blacklist:
+
         utterance = str_level.TM_REGEX.sub(lambda m: m.group(1) + m.group(3), utterance)
         global MAX_LEN_STR_BLACKWORD
         black_word = str_level.de_str_blacklist2(tight_utter, blacklist["str_blacklist"], MAX_LEN_STR_BLACKWORD)
+
         if black_word:
             if dirty_data:
                 dirty_data["str_blacklist"][black_word].add(orig_utter)
             utterance = ""
+
 
     # TODO: 没细看
     if utterance and opt.de_duplicated:
@@ -457,6 +466,7 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
             if dirty_data:
                 dirty_data["other"]["long"].add(orig_utter)
             utterance = ""
+    
 
     # songyi 10-6 
     if utterance and opt.simplified:
@@ -464,7 +474,6 @@ def utterance_clean(opt, file_id, utterance, tight_utter, blacklist, dirty_data,
     
     if utterance and opt.punc_regularized:
         utterance = str_level.puncRegularized(utterance)
-
 
 
     if not any([opt.no_alpha_noise, opt.check_confuse_word, opt.no_word_blacklist, opt.yda_dedupl]):
