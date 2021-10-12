@@ -21,7 +21,12 @@ def convert_to_jsonl(file, write_suffix):
     if not os.path.exists(write_suffix):
         os.makedirs(write_suffix)
 
-    write_path = os.path.join(write_suffix, file.rsplit('/', 1)[-1] + 'jsonl')
+
+    file_name = file.rsplit('/', 1)[-1]
+    if file_name.find('.') >= 0:
+        file_name = file_name.rsplit('.', 1)[0]
+
+    write_path = os.path.join(write_suffix, file_name + '.jsonl')
 
 
     with open(file, 'r', errors='ignore') as f:
@@ -77,12 +82,6 @@ def removeAll(text):
 import os
 import random
 if __name__ == '__main__':
-    # print(score())
-
-    # to_jsonl('lccc')
-    # to_jsonl('lccc-origin')
-
-    print(removeAll('$*&(@$#)($&)2346'))
 
     # 评估lccc
     # suffix = '/extension/songyi/lccc-origin/'
@@ -93,11 +92,12 @@ if __name__ == '__main__':
     ## 评估基本分数
     suffix = '/extension/songyi/douban_data'
     file_paths = [os.path.join(suffix, file) for file in os.listdir(suffix)]
-    #print(score(file_paths))
-    ## 评估留存率
+    # print(score(file_paths[:2]))
+    ## 转换数据格式，评估留存率，需要调用test.sh
     import random
-    write_suffix = '/home/songyi/clean/9-30/clean_test/input/douban/test/'
-    convert_to_jsonl(random.choice(file_paths), write_suffix)
+    write_suffix = '/extension/songyi/cleaned/douban/'
+    for file_path in tqdm(file_paths):
+        convert_to_jsonl(file_path, write_suffix)
 
     
     

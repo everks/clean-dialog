@@ -69,10 +69,12 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
 
             # songyi 10-6
             if opt.no_session_ad and session_level.isAd(dialog):
-                dirty_data['other']['session_ad'].add(dialog[0])
+                if dirty_data:
+                    dirty_data['other']['session_ad'].add(dialog[0])
                 continue
             if opt.context_filter and not session_level.pass_context_filter(dialog):
-                dirty_data['other']['session_filter'].add(dialog[0])
+                if dirty_data:
+                    dirty_data['other']['session_filter'].add(dialog[0])
                 continue
 
             new_dialog = []
