@@ -48,7 +48,7 @@ def load_gz_jsonl(path):
         return [json.loads(line) for line in f.readlines() if len(line.strip()) > 0]
 
 
-def load_lines(path, start, end):
+def load_lines(path, start, end, data_format):
     '''
     Returns:
         data -> list: path文件中的[start, end)行，每一行是一个dialog。
@@ -62,7 +62,12 @@ def load_lines(path, start, end):
                 break
             if i > start - 1:
                 if len(line.strip()) > 0:
-                    data.append(json.loads(line))
+                    if data_format == 'jsonl':
+                        data.append(json.loads(line))
+                    elif data_format == 'tsv':
+                        data.append(line.strip('\n').strip('\t').split('\t'))
+                    else:
+                        raise RuntimeError("输入格式错误")
     return data
 
 

@@ -47,6 +47,7 @@ NOTE THAT:
 | tool_dir          | 工具数据所在目录（如黑名单）|
 | out_dir           | 清洗后的文件输出目录 |
 | raw_dir           | 待处理文件所在mull  |
+| raw_format        | 待处理文件的格式（目前可使用jsonl和tsv）  |
 | dirty_dir         | 存储清洗出来的脏数据，如为空则不存  |
 | :---------------  | :------------------- |
 | split_multi_repost| 将微博转发数据按"//@aaa XXXX //@bbb XXX"撕开成多句  |

@@ -52,11 +52,13 @@ def score(file_paths):
     session_count, sentence_count, token_count, \
         multi_session_count, multi_sentence_count, multi_token_count = 0, 0, 0, 0, 0, 0
     
-    for file_path in file_paths:
+    for file_path in tqdm(file_paths):
         with open(file_path, 'r', errors='ignore') as f:
             lines = f.read().strip('\n').split('\n')
-        for line in tqdm(lines):
-            dialog = line.split('\t')
+        for line in lines:
+            dialog = line.split('\t\t')
+            
+
             session_count += 1
             sentence_count += len(dialog)
             if len(dialog) > 2:
@@ -68,7 +70,7 @@ def score(file_paths):
                     multi_token_count += len(sentence)
     
     return session_count, sentence_count / session_count, token_count / sentence_count, \
-        session_count - multi_session_count, multi_sentence_count / multi_session_count, \
+        multi_session_count, multi_sentence_count / multi_session_count, \
             multi_token_count / multi_sentence_count
             
 import re
@@ -90,14 +92,22 @@ if __name__ == '__main__':
     # 评估豆瓣
 
     ## 评估基本分数
-    suffix = '/extension/songyi/douban_data'
+    # suffix = '/extension/songyi/douban_data'
+    # file_paths = [os.path.join(suffix, file) for file in os.listdir(suffix)]
+    # # print(score(file_paths[:2]))
+    # ## 转换数据格式，评估留存率，需要调用test.sh
+    # import random
+    # write_suffix = '/extension/songyi/cleaned/douban/'
+    # for file_path in tqdm(file_paths):
+    #     convert_to_jsonl(file_path, write_suffix)
+
+    suffix = '/home/songyi/story/output/cleaned_data/'
     file_paths = [os.path.join(suffix, file) for file in os.listdir(suffix)]
-    # print(score(file_paths[:2]))
-    ## 转换数据格式，评估留存率，需要调用test.sh
-    import random
-    write_suffix = '/extension/songyi/cleaned/douban/'
-    for file_path in tqdm(file_paths):
-        convert_to_jsonl(file_path, write_suffix)
+    print(score(file_paths))
+
+
+
+
 
     
     

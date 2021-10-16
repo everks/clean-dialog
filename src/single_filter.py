@@ -52,7 +52,7 @@ def main_filter(opt, file_id, data, blacklist, out_path, dirty_dir, cut=True):
 
         res = []
         if isinstance(data, tuple):
-            data = load_lines(data[0], data[1], data[2])
+            data = load_lines(data[0], data[1], data[2], opt.raw_format)
         logger.info("Size of this batch : {}, log in {}".format(len(data), file_id))
         logger.info("Batch sample: {}, log in {}".format(data[0][0], file_id))
         while len(data):

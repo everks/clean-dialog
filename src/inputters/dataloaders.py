@@ -30,7 +30,12 @@ def simple_dataloader(dir_path, out_dir, batch_size):
 def paths_dataloader(dir_path, out_dir, batch_size):
     """Load jsonl data, each line should be a list of dialog: ["你好", "你也好", "哈哈"]
     清洗过后的文件保存在"out_dir/cleaned_data/"目录下
-    输入目录应为单层目录
+    输入目录应为单层目录，输入格式应为每行一个数据
+    args:
+        dir_path: 输入路径（notice！！！！：路径下不可有其他文件，因为可能数据文件没有后缀，无法根据后缀进行处理）
+        out_dir: 输出路径
+        batch_size: 每个进程处理的行数
+        
 
     return:
         fid: 清洗后的数据存放的文件名（不包含后缀）
@@ -43,8 +48,11 @@ def paths_dataloader(dir_path, out_dir, batch_size):
     cleaned_dir = os.path.join(out_dir, "cleaned_data")
     if not os.path.exists(cleaned_dir):
         os.makedirs(cleaned_dir)
-    jsonl_path_list = [(file, os.path.join(dir_path, file)) for file in os.listdir(dir_path) if file.endswith('.jsonl')]
-    for file, path in jsonl_path_list:
+
+    path_list = [(file, os.path.join(dir_path, file)) for file in os.listdir(dir_path)]
+
+
+    for file, path in path_list:
         if platform.system() == "Windows":
             file_len = buff_count(path)
         elif platform.system() == "Linux":
@@ -53,7 +61,7 @@ def paths_dataloader(dir_path, out_dir, batch_size):
             raise Exception
         print('path', file_len)
         for i in range(0, file_len, batch_size):
-            fid = file.replace(".jsonl", "") + "_trunc" + str(i)
+            fid = file.rsplit(".", 1)[0] + "_trunc" + str(i)
             # out
             out_subdir = cleaned_dir
             if not os.path.exists(out_subdir):

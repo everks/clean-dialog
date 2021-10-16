@@ -53,6 +53,7 @@ def main():
     parser.add_argument("--out_dir", type=str, default="./data/", help="Main data dir.")
     parser.add_argument("--dirty_dir", type=str, default="", help="Dir to save dirty cases.")
     parser.add_argument("--raw_dir", type=str, default="./data/raw/", help="Dir of the raw dataset.")
+    parser.add_argument('--raw_format', type=str, default='jsonl', help="format of the raw dataset")
     
     # TODO: 不知道里面具体是什么参数 
     add_filter_args(parser)
